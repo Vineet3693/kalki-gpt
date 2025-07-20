@@ -1,5 +1,5 @@
 
-# ADD THIS TO YOUR EXISTING src/data_loader.py file
+# src/data_loader.py - REPLACE ENTIRE FILE WITH THIS:
 
 import streamlit as st
 import requests
@@ -9,11 +9,11 @@ import tempfile
 import os
 from pathlib import Path
 
-# 🔧 YOUR ACTUAL GOOGLE DRIVE FILE ID
-GDRIVE_ZIP_ID = "1AKXBWVM2ooeZ8MJ5ZeRHS1Ph1JObcDP0"
+# 🔧 CORRECT FILE ID (NO FULL URL!)
+GDRIVE_ZIP_ID = "1AKXBWVM2ooeZ8MJ5ZeRHS1Ph1JObcDP0"  # ← ONLY FILE ID
 
 @st.cache_data
-def load_scripture_data_from_drive():
+def load_all_scripture_data():
     """Load scripture data from Google Drive ZIP"""
     try:
         url = f"https://drive.google.com/uc?export=download&id={GDRIVE_ZIP_ID}"
@@ -49,6 +49,28 @@ def load_scripture_data_from_drive():
         st.error(f"❌ Failed to load scripture data: {e}")
         return {}
 
+# Keep your existing class name for compatibility
+class DharmicDataLoader:
+    def __init__(self):
+        self.data = None
+    
+    def load_data(self):
+        """Load data using the new Google Drive method"""
+        if self.data is None:
+            self.data = load_all_scripture_data()
+        return self.data
+    
+    def get_all_texts(self):
+        """Get all loaded texts"""
+        if self.data is None:
+            self.data = load_all_scripture_data()
+        return self.data
+
+# Additional functions for compatibility
+def get_scripture_data():
+    """Simple function to get all scripture data"""
+    return load_all_scripture_data()
+
 def get_all_scripture_data():
-    """Get all scripture data - use this in your app"""
-    return load_scripture_data_from_drive()
+    """Alternative function name"""
+    return load_all_scripture_data()

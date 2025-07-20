@@ -2,7 +2,7 @@
 import streamlit as st
 from typing import Dict, List, Any, Optional
 import os
-from src.data_loader import DharmicDataLoader
+from src.data_loader import DharmicDataLoader, get_all_scripture_data
 from src.text_processor import TextProcessor
 from src.embeddings import EmbeddingManager
 from src.vector_store import VectorStore
@@ -18,7 +18,8 @@ class KalkiRAGChain:
     """Complete RAG pipeline for Kalki GPT"""
     
     def __init__(self):
-        self.data_loader = DharmicDataLoader(Config.DATA_PATH)
+        # Updated to use new Google Drive loader without path requirement
+        self.data_loader = DharmicDataLoader()  # No path needed now
         self.text_processor = TextProcessor()
         self.embedding_manager = EmbeddingManager()
         self.vector_store = VectorStore()
@@ -36,9 +37,15 @@ class KalkiRAGChain:
         try:
             logger.info("Initializing Kalki RAG Chain...")
             
-            with st.spinner("Loading sacred texts..."):
-                # Load all texts
-                _self.texts = _self.data_loader.load_all_texts()
+            with st.spinner("Loading sacred texts from Google Drive..."):
+                # Use the new Google Drive loading method
+                raw_data = get_all_scripture_data()
+                if not raw_data:
+                    st.error("Failed to load scripture data from Google Drive")
+                    return False
+                
+                # Convert to the format expected by text processor
+                _self.texts = _self._convert_data_format(raw_data)
                 logger.info(f"Loaded {len(_self.texts)} texts")
             
             with st.spinner("Processing texts..."):
@@ -82,6 +89,83 @@ class KalkiRAGChain:
             logger.error(f"Error initializing RAG Chain: {e}")
             st.error(f"Failed to initialize system: {e}")
             return False
+    
+    def _convert_data_format(self, raw_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Convert raw Google Drive data to expected format"""
+        converted_texts = []
+        
+        for filename, file_content in raw_data.items():
+            try:
+                # Handle different data structures
+                if isinstance(file_content, list):
+                    # If file content is a list of items
+                    for idx, item in enumerate(file_content):
+                        converted_item = {
+                            "id": f"{filename}_{idx}",
+                            "content": item if isinstance(item, dict) else {"text": str(item)},
+                            "metadata": {
+                                "collection": self._get_collection_name(filename),
+                                "source_file": filename,
+                                "item_index": idx,
+                                "total_items": len(file_content)
+                            }
+                        }
+                        converted_texts.append(converted_item)
+                
+                elif isinstance(file_content, dict):
+                    # If file content is a single dictionary
+                    converted_item = {
+                        "id": filename,
+                        "content": file_content,
+                        "metadata": {
+                            "collection": self._get_collection_name(filename),
+                            "source_file": filename,
+                            "item_index": 0,
+                            "total_items": 1
+                        }
+                    }
+                    converted_texts.append(converted_item)
+                
+                else:
+                    # Handle other data types as text
+                    converted_item = {
+                        "id": filename,
+                        "content": {"text": str(file_content)},
+                        "metadata": {
+                            "collection": self._get_collection_name(filename),
+                            "source_file": filename,
+                            "item_index": 0,
+                            "total_items": 1
+                        }
+                    }
+                    converted_texts.append(converted_item)
+                    
+            except Exception as e:
+                logger.error(f"Error processing file {filename}: {e}")
+                continue
+        
+        return converted_texts
+    
+    def _get_collection_name(self, filename: str) -> str:
+        """Extract collection name from filename"""
+        filename_lower = filename.lower()
+        
+        if "bhagavad" in filename_lower or "gita" in filename_lower:
+            return "bhagavad_gita"
+        elif "ramayana" in filename_lower:
+            return "ramayana"
+        elif "mahabharata" in filename_lower:
+            return "mahabharata"
+        elif "rigveda" in filename_lower or "rig_veda" in filename_lower:
+            return "rigveda"
+        elif "yajurveda" in filename_lower or "yajur_veda" in filename_lower:
+            return "yajurveda"
+        elif "atharvaveda" in filename_lower or "atharva_veda" in filename_lower:
+            return "atharvaveda"
+        elif "ramcharitmanas" in filename_lower:
+            return "ramcharitmanas"
+        else:
+            return "unknown"
     
     def ask(self, question: str, scripture_filter: str = "All Texts", 
             language_preference: str = "🌍 All Languages") -> Dict[str, Any]:

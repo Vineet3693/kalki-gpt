@@ -1,0 +1,171 @@
+
+/* Sanskrit and Devanagari Specific Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+.devanagari-primary {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-weight: 400;
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+}
+
+.devanagari-bold {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-weight: 700;
+}
+
+.devanagari-light {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-weight: 300;
+}
+
+/* Sanskrit Text Variants */
+.sanskrit-verse {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-size: 1.4em;
+  color: #8B0000;
+  background: linear-gradient(135deg, #FFF8DC, #F5DEB3);
+  padding: 2rem;
+  border-left: 5px solid #FF6B35;
+  border-radius: 10px;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+  line-height: 2;
+}
+
+.sanskrit-mantra {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-size: 1.3em;
+  color: #4B0082;
+  background: radial-gradient(circle, #FFF8DC, #E6E6FA);
+  padding: 1.5rem;
+  border: 2px solid #DDA0DD;
+  border-radius: 15px;
+  text-align: center;
+  margin: 1rem 0;
+  position: relative;
+}
+
+.sanskrit-mantra::before {
+  content: "🕉️";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 0 10px;
+  font-size: 1.2em;
+}
+
+.sanskrit-sloka {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-size: 1.2em;
+  color: #2F4F4F;
+  background: #F0F8FF;
+  padding: 1.2rem;
+  border-left: 3px solid #4169E1;
+  border-radius: 8px;
+  margin: 1rem 0;
+  line-height: 1.8;
+}
+
+/* Transliteration Styles */
+.transliteration {
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  color: #696969;
+  font-size: 1em;
+  background: #F5F5F5;
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin: 0.5rem 0;
+  border-left: 2px solid #D3D3D3;
+}
+
+.transliteration::before {
+  content: "Transliteration: ";
+  font-weight: bold;
+  color: #4169E1;
+}
+
+/* Special Characters and Symbols */
+.om-symbol {
+  font-size: 2em;
+  color: #FF6B35;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.vedic-accent {
+  position: relative;
+}
+
+.vedic-accent::after {
+  content: "॑";
+  position: absolute;
+  top: -5px;
+  font-size: 0.7em;
+  color: #FF4500;
+}
+
+/* Chapter and Verse Numbers */
+.chapter-number {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-size: 1.1em;
+  color: #8B4513;
+  font-weight: bold;
+  background: #FFF8DC;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
+.verse-number {
+  font-family: 'Georgia', serif;
+  font-size: 0.9em;
+  color: #696969;
+  background: #F0F0F0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+/* Responsive Sanskrit Text */
+@media (max-width: 768px) {
+  .sanskrit-verse {
+    font-size: 1.2em;
+    padding: 1.5rem;
+  }
+  
+  .sanskrit-mantra {
+    font-size: 1.1em;
+    padding: 1.2rem;
+  }
+  
+  .sanskrit-sloka {
+    font-size: 1.1em;
+    padding: 1rem;
+  }
+  
+  .transliteration {
+    font-size: 0.95em;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sanskrit-verse,
+  .sanskrit-mantra,
+  .sanskrit-sloka {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+}
+
+----

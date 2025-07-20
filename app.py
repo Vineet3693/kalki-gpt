@@ -1,4 +1,11 @@
 
+# ADD THESE 3 LINES AT THE TOP OF YOUR EXISTING app.py
+from src.drive_loader import get_scripture_data
+
+# ADD THIS 1 LINE WHEREVER YOU NEED THE DATA
+scripture_data = get_scripture_data()
+
+# Now use 'scripture_data' anywhere in your existing code - it contains all your JSON files
 import streamlit as st
 import os
 from pathlib import Path

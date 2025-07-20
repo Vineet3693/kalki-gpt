@@ -1,0 +1,284 @@
+
+/* Kalki GPT Main Stylesheet */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Serif:wght@400;700&display=swap');
+
+/* Global Styles */
+:root {
+  --primary-color: #FF6B35;
+  --secondary-color: #F7931E;
+  --sanskrit-bg: #FFF8DC;
+  --hindi-bg: #F8F9FA;
+  --english-bg: #FFFFFF;
+  --text-dark: #2C3E50;
+  --text-light: #7F8C8D;
+  --border-color: #E1E8ED;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Typography */
+.devanagari-font {
+  font-family: 'Noto Sans Devanagari', serif;
+}
+
+.serif-font {
+  font-family: 'Noto Serif', serif;
+}
+
+/* Component Styles */
+.main-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+}
+
+.question-input {
+  border: 2px solid var(--primary-color) !important;
+  border-radius: 8px !important;
+  font-size: 1.1em !important;
+  padding: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.question-input:focus {
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2) !important;
+}
+
+/* Text Display Styles */
+.sanskrit-text {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-size: 1.3em;
+  color: #8B4513;
+  background: linear-gradient(135deg, var(--sanskrit-bg), #F0E68C);
+  padding: 1.5rem;
+  border-left: 4px solid var(--primary-color);
+  border-radius: 8px;
+  margin: 1rem 0;
+  box-shadow: var(--shadow);
+  line-height: 1.8;
+}
+
+.hindi-text {
+  font-family: 'Noto Sans Devanagari', serif;
+  font-size: 1.1em;
+  color: var(--text-dark);
+  background: var(--hindi-bg);
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.english-text {
+  font-family: 'Noto Serif', serif;
+  color: #1B4F72;
+  line-height: 1.8;
+  padding: 1rem;
+  background: var(--english-bg);
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+/* Card Styles */
+.source-card {
+  background: #F7F9FC;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  transition: all 0.3s ease;
+}
+
+.source-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.stats-card {
+  background: #E3F2FD;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  border: 1px solid #BBDEFB;
+}
+
+.sidebar-content {
+  background-color: #F8F9FA;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+/* Interactive Elements */
+.sample-question {
+  background: #FFF3E0;
+  border: 1px solid #FFB74D;
+  border-radius: 6px;
+  padding: 0.8rem;
+  margin: 0.3rem 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.sample-question:hover {
+  background: #FFF8E1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.related-questions {
+  background: #FFF3E0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid #FFE0B2;
+}
+
+.question-item {
+  background: var(--english-bg);
+  border: 1px solid #FFB74D;
+  border-radius: 6px;
+  padding: 0.8rem;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.question-item:hover {
+  background: #FFF8E1;
+  transform: translateY(-2px);
+}
+
+/* Utility Classes */
+.source-title {
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-size: 1.1em;
+}
+
+.verse-reference {
+  font-size: 0.9em;
+  color: var(--text-light);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.similarity-score {
+  background: #E8F5E8;
+  color: #2E7D32;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  display: inline-block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-header {
+    padding: 1rem;
+    font-size: 0.9em;
+  }
+  
+  .sanskrit-text {
+    font-size: 1.1em;
+    padding: 1rem;
+  }
+  
+  .source-card {
+    padding: 0.8rem;
+  }
+  
+  .question-input {
+    font-size: 1em !important;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-header {
+    padding: 1rem;
+    font-size: 0.9em;
+  }
+  
+  .sanskrit-text {
+    font-size: 1.1em;
+    padding: 1rem;
+  }
+  
+  .source-card {
+    padding: 0.8rem;
+  }
+  
+  .question-input {
+    font-size: 1em !important;
+  }
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(20px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+/* Loading States */
+.loading-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}

@@ -1,0 +1,124 @@
+
+/* Responsive Design for Kalki GPT */
+
+/* Mobile First Approach */
+@media (max-width: 480px) {
+  .main-header h1 {
+    font-size: 1.8em !important;
+  }
+  
+  .main-header p {
+    font-size: 0.9em !important;
+  }
+  
+  .question-input {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+  
+  .source-card {
+    padding: 0.8rem;
+    margin: 0.3rem 0;
+  }
+  
+  .sanskrit-text {
+    font-size: 1.1em;
+    padding: 1rem;
+  }
+  
+  .hindi-text {
+    font-size: 1em;
+    padding: 0.8rem;
+  }
+  
+  .english-text {
+    font-size: 0.95em;
+    padding: 0.8rem;
+  }
+}
+
+/* Tablet Styles */
+@media (min-width: 481px) and (max-width: 768px) {
+  .main-header {
+    padding: 1.5rem;
+  }
+  
+  .source-card {
+    padding: 1rem;
+  }
+  
+  .sanskrit-text {
+    font-size: 1.25em;
+    padding: 1.3rem;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main-header {
+    padding: 2rem;
+  }
+  
+  .question-input {
+    font-size: 1.1em !important;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1025px) {
+  .main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .sanskrit-text {
+    font-size: 1.4em;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-height: 480px) and (orientation: landscape) {
+  .main-header {
+    padding: 1rem;
+  }
+  
+  .main-header h1 {
+    font-size: 1.5em !important;
+  }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .sanskrit-text {
+    text-rendering: optimizeLegibility;
+  }
+  
+  .devanagari-font {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .source-card {
+    background: #2C3E50;
+    border-color: #34495E;
+    color: #ECF0F1;
+  }
+  
+  .stats-card {
+    background: #34495E;
+    color: #ECF0F1;
+  }
+}
+
+----

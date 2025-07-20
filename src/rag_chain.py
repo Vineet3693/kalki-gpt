@@ -1,97 +1,94 @@
 
+# src/rag_chain.py - FAST VERSION WITHOUT EMBEDDINGS
+
 import streamlit as st
 from typing import Dict, List, Any, Optional
 import os
 from src.data_loader import DharmicDataLoader, get_all_scripture_data
 from src.text_processor import TextProcessor
-from src.embeddings import EmbeddingManager
-from src.vector_store import VectorStore
 from src.query_processor import QueryProcessor
 from src.llm_handler import LLMHandler
 from src.response_formatter import ResponseFormatter
-from src.utils import setup_logging, save_json, load_json
+from src.utils import setup_logging
 from config import Config
 
 logger = setup_logging()
 
 class KalkiRAGChain:
-    """Complete RAG pipeline for Kalki GPT"""
+    """Fast RAG Chain without slow embeddings"""
     
     def __init__(self):
-        # Updated to use new Google Drive loader without path requirement
-        self.data_loader = DharmicDataLoader()  # No path needed now
+        self.data_loader = DharmicDataLoader()
         self.text_processor = TextProcessor()
-        self.embedding_manager = EmbeddingManager()
-        self.vector_store = VectorStore()
         self.query_processor = QueryProcessor()
         self.llm_handler = LLMHandler()
         self.response_formatter = ResponseFormatter()
         
         self.texts = None
-        self.embeddings = None
         self.is_initialized = False
     
-    @st.cache_data
-    def initialize(_self, force_rebuild: bool = False) -> bool:
-        """Initialize the RAG system with caching"""
+    def initialize(self, force_rebuild: bool = False) -> bool:
+        """Fast initialization without embeddings"""
         try:
-            logger.info("Initializing Kalki RAG Chain...")
+            logger.info("🚀 Starting fast initialization...")
             
-            with st.spinner("Loading sacred texts from Google Drive..."):
-                # Use the new Google Drive loading method
+            with st.spinner("📥 Loading sacred texts from GitHub..."):
+                # Use local GitHub files instead of Google Drive
                 raw_data = get_all_scripture_data()
                 if not raw_data:
-                    st.error("Failed to load scripture data from Google Drive")
+                    st.error("❌ Failed to load scripture data from GitHub")
                     return False
                 
                 # Convert to the format expected by text processor
-                _self.texts = _self._convert_data_format(raw_data)
-                logger.info(f"Loaded {len(_self.texts)} texts")
+                self.texts = self._convert_data_format(raw_data)
+                logger.info(f"✅ Loaded {len(self.texts)} texts")
+                st.success(f"📚 Loaded {len(self.texts)} text items from scriptures!")
             
-            with st.spinner("Processing texts..."):
-                # Process texts into chunks
-                processed_texts = _self.text_processor.process_texts(_self.texts)
-                _self.texts = processed_texts
-                logger.info(f"Created {len(processed_texts)} text chunks")
+            with st.spinner("🔄 Processing texts for search..."):
+                # Simple text processing without heavy operations
+                processed_texts = self._simple_process_texts(self.texts)
+                self.texts = processed_texts
+                logger.info(f"✅ Processed {len(processed_texts)} text chunks")
             
-            # Try to load existing embeddings
-            if not force_rebuild:
-                embeddings, cached_texts = _self.embedding_manager.load_embeddings()
-                if embeddings is not None and cached_texts is not None:
-                    logger.info("Loaded cached embeddings")
-                    _self.embeddings = embeddings
-                    _self.texts = cached_texts
-                    
-                    # Load FAISS index
-                    if _self.vector_store.load_index():
-                        logger.info("Loaded cached FAISS index")
-                        _self.is_initialized = True
-                        return True
-            
-            # Create new embeddings if not cached or force rebuild
-            with st.spinner("Creating embeddings... This may take a few minutes."):
-                _self.embeddings = _self.embedding_manager.create_embeddings(_self.texts)
-            
-            with st.spinner("Creating search index..."):
-                # Create and save FAISS index
-                _self.vector_store.create_index(_self.embeddings)
-                _self.vector_store.save_index()
-            
-            with st.spinner("Saving embeddings..."):
-                # Save embeddings for future use
-                _self.embedding_manager.save_embeddings(_self.embeddings, _self.texts)
-            
-            _self.is_initialized = True
-            logger.info("RAG Chain initialization complete!")
+            self.is_initialized = True
+            st.success("✅ Fast initialization complete! Ready to answer questions.")
+            logger.info("🎉 RAG Chain initialization complete!")
             return True
             
         except Exception as e:
-            logger.error(f"Error initializing RAG Chain: {e}")
-            st.error(f"Failed to initialize system: {e}")
+            logger.error(f"❌ Error initializing RAG Chain: {e}")
+            st.error(f"❌ Failed to initialize system: {e}")
             return False
     
+    def _simple_process_texts(self, texts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Simple text processing without heavy operations"""
+        processed_texts = []
+        
+        for text in texts:
+            try:
+                content = text.get('content', {})
+                
+                # Extract text content for search
+                search_text = ""
+                if isinstance(content, dict):
+                    for field in ['text', 'english', 'hindi', 'content', 'verse', 'meaning']:
+                        if field in content and content[field]:
+                            search_text += str(content[field]) + " "
+                else:
+                    search_text = str(content)
+                
+                # Add search text to the item
+                text['search_text'] = search_text.strip().lower()
+                processed_texts.append(text)
+                
+            except Exception as e:
+                logger.error(f"Error processing text item: {e}")
+                continue
+        
+        return processed_texts
+    
     def _convert_data_format(self, raw_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Convert raw Google Drive data to expected format"""
+        """Convert raw GitHub data to expected format"""
         converted_texts = []
         
         for filename, file_content in raw_data.items():
@@ -105,6 +102,7 @@ class KalkiRAGChain:
                             "content": item if isinstance(item, dict) else {"text": str(item)},
                             "metadata": {
                                 "collection": self._get_collection_name(filename),
+                                "collection_display": self._get_collection_display_name(filename),
                                 "source_file": filename,
                                 "item_index": idx,
                                 "total_items": len(file_content)
@@ -119,6 +117,7 @@ class KalkiRAGChain:
                         "content": file_content,
                         "metadata": {
                             "collection": self._get_collection_name(filename),
+                            "collection_display": self._get_collection_display_name(filename),
                             "source_file": filename,
                             "item_index": 0,
                             "total_items": 1
@@ -133,6 +132,7 @@ class KalkiRAGChain:
                         "content": {"text": str(file_content)},
                         "metadata": {
                             "collection": self._get_collection_name(filename),
+                            "collection_display": self._get_collection_display_name(filename),
                             "source_file": filename,
                             "item_index": 0,
                             "total_items": 1
@@ -147,180 +147,271 @@ class KalkiRAGChain:
         return converted_texts
     
     def _get_collection_name(self, filename: str) -> str:
-        """Extract collection name from filename"""
+        """Extract collection name from filename for internal use"""
         filename_lower = filename.lower()
         
-        if "bhagavad" in filename_lower or "gita" in filename_lower:
+        if any(word in filename_lower for word in ['ramcharitmanas', 'ramcharit']):
+            return 'ramcharitmanas'
+        elif any(word in filename_lower for word in ['valmiki', 'valmikiramayana']):
+            return 'valmiki_ramayana'
+        elif "bhagavad" in filename_lower or "gita" in filename_lower:
             return "bhagavad_gita"
         elif "ramayana" in filename_lower:
             return "ramayana"
         elif "mahabharata" in filename_lower:
             return "mahabharata"
-        elif "rigveda" in filename_lower or "rig_veda" in filename_lower:
-            return "rigveda"
-        elif "yajurveda" in filename_lower or "yajur_veda" in filename_lower:
-            return "yajurveda"
-        elif "atharvaveda" in filename_lower or "atharva_veda" in filename_lower:
-            return "atharvaveda"
-        elif "ramcharitmanas" in filename_lower:
-            return "ramcharitmanas"
         else:
-            return "unknown"
+            return "other_texts"
+    
+    def _get_collection_display_name(self, filename: str) -> str:
+        """Extract collection display name from filename"""
+        filename_lower = filename.lower()
+        
+        if any(word in filename_lower for word in ['ramcharitmanas', 'ramcharit']):
+            return 'Ramcharitmanas'
+        elif any(word in filename_lower for word in ['valmiki', 'valmikiramayana']):
+            return 'Valmiki Ramayana'
+        elif "bhagavad" in filename_lower or "gita" in filename_lower:
+            return "Bhagavad Gita"
+        elif "ramayana" in filename_lower:
+            return "Ramayana"
+        elif "mahabharata" in filename_lower:
+            return "Mahabharata"
+        else:
+            return "Other Texts"
+    
+    def fast_search(self, question: str, scripture_filter: str = "All Texts", max_results: int = 5):
+        """Fast keyword-based search instead of embedding search"""
+        
+        # Process question into keywords
+        question_lower = question.lower()
+        question_words = set(question_lower.split())
+        
+        # Remove common stop words
+        stop_words = {
+            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+            'of', 'with', 'by', 'is', 'are', 'was', 'were', 'what', 'how', 'why',
+            'where', 'when', 'who', 'which', 'does', 'do', 'did', 'can', 'could',
+            'should', 'would', 'will', 'about', 'tell', 'me', 'according', 'says',
+            'का', 'की', 'के', 'में', 'से', 'को', 'और', 'है', 'हैं'
+        }
+        
+        keywords = question_words - stop_words
+        
+        results = []
+        
+        for text_item in self.texts:
+            # Apply scripture filter
+            if scripture_filter != "All Texts":
+                collection_display = text_item.get('metadata', {}).get('collection_display', '')
+                if scripture_filter.lower() not in collection_display.lower():
+                    continue
+            
+            # Get search text
+            search_text = text_item.get('search_text', '')
+            
+            if not search_text.strip():
+                continue
+            
+            # Calculate relevance score
+            text_words = set(search_text.split())
+            
+            # Count keyword matches
+            matches = 0
+            bonus_matches = 0
+            
+            for keyword in keywords:
+                if keyword in search_text:
+                    matches += 1
+                    # Bonus for exact word match
+                    if keyword in text_words:
+                        bonus_matches += 0.5
+            
+            total_matches = matches + bonus_matches
+            
+            if total_matches > 0:
+                relevance_score = total_matches / len(keywords) if keywords else 0
+                
+                results.append({
+                    'content': text_item.get('content', {}),
+                    'metadata': text_item.get('metadata', {}),
+                    'similarity_score': relevance_score,
+                    'match_count': matches
+                })
+        
+        # Sort by relevance (higher is better)
+        results.sort(key=lambda x: (x['similarity_score'], x['match_count']), reverse=True)
+        
+        return results[:max_results]
     
     def ask(self, question: str, scripture_filter: str = "All Texts", 
             language_preference: str = "🌍 All Languages") -> Dict[str, Any]:
-        """Ask a question and get comprehensive answer"""
+        """Ask a question using fast keyword search"""
         
         if not self.is_initialized:
-            if not self.initialize():
-                return {"error": "System not initialized"}
+            return {"error": "System not initialized. Please click 'Initialize System' first."}
         
         try:
             # Process query
-            processed_query = self.query_processor.process_query(
-                question, scripture_filter
-            )
-            
-            # Search for relevant texts
-            with st.spinner("Searching scriptures..."):
-                relevant_texts = self._search_relevant_texts(
-                    processed_query["expanded"], 
-                    scripture_filter
+            with st.spinner("🔍 Processing your question..."):
+                processed_query = self.query_processor.process_query(
+                    question, scripture_filter
                 )
             
-            if not relevant_texts:
+            # Fast search instead of embedding search
+            with st.spinner("🔍 Searching scriptures..."):
+                relevant_sources = self.fast_search(question, scripture_filter, max_results=5)
+            
+            if not relevant_sources:
                 return {
-                    "response": "I couldn't find relevant information in the scriptures for your question. Please try rephrasing or asking about different topics.",
+                    "response": "I couldn't find relevant information about your question in the loaded scriptures. Please try rephrasing your question or asking about topics like dharma, devotion, life principles, or spiritual guidance.",
                     "sources": [],
-                    "query": question
+                    "query": question,
+                    "processed_query": processed_query
                 }
             
-            # Generate response using LLM
-            with st.spinner("Generating response..."):
-                llm_response = self.llm_handler.generate_response(
-                    question, relevant_texts, language_preference
-                )
+            # Generate response using LLM or simple method
+            with st.spinner("📝 Generating response..."):
+                response_text = self._generate_response(question, relevant_sources, language_preference)
             
-            # Format response for display
-            formatted_response = self.response_formatter.format_response(llm_response)
-            
-            # Add processed query info
-            formatted_response["processed_query"] = processed_query
-            
-            return formatted_response
+            return {
+                "response": response_text,
+                "sources": relevant_sources,
+                "query": question,
+                "processed_query": processed_query,
+                "scripture_filter": scripture_filter,
+                "search_method": "keyword_based"
+            }
             
         except Exception as e:
             logger.error(f"Error in ask method: {e}")
             return {
-                "error": f"Error processing question: {str(e)}",
+                "error": f"An error occurred while processing your question: {str(e)}",
                 "query": question
             }
     
-    def _search_relevant_texts(self, query: str, scripture_filter: str) -> List[Dict[str, Any]]:
-        """Search for relevant texts using vector similarity"""
+    def _generate_response(self, question: str, sources: List[Dict], language_preference: str) -> str:
+        """Generate response using LLM or simple fallback"""
         
-        # Create query embedding
-        if not self.embedding_manager.model:
-            self.embedding_manager.model = self.embedding_manager.load_model()
-        
-        query_embedding = self.embedding_manager.model.encode(
-            [query], normalize_embeddings=True
-        )
-        
-        # Search using FAISS
-        scores, indices = self.vector_store.search(
-            query_embedding, k=Config.TOP_K_RESULTS * 2  # Get more results for filtering
-        )
-        
-        # Filter results
-        relevant_texts = []
-        for score, idx in zip(scores[0], indices[0]):
-            if idx < len(self.texts) and score >= Config.SIMILARITY_THRESHOLD:
-                text = self.texts[idx].copy()
-                text["similarity_score"] = float(score)
+        try:
+            # Try to use LLM handler if available
+            if hasattr(self.llm_handler, 'generate_response'):
+                context_parts = []
+                for source in sources:
+                    content = source['content']
+                    if isinstance(content, dict):
+                        for field in ['text', 'english', 'hindi', 'content']:
+                            if field in content and content[field]:
+                                context_parts.append(str(content[field]))
+                                break
                 
-                # Apply scripture filter
-                if self._matches_scripture_filter(text, scripture_filter):
-                    relevant_texts.append(text)
+                context = "\n\n".join(context_parts[:3])
+                return self.llm_handler.generate_response(question, context, language_preference)
+            
+        except Exception as e:
+            logger.error(f"LLM generation failed: {e}")
         
-        # Sort by relevance and limit results
-        relevant_texts.sort(key=lambda x: x["similarity_score"], reverse=True)
-        return relevant_texts[:Config.TOP_K_RESULTS]
+        # Fallback to simple response
+        return self._create_simple_response(question, sources)
     
-    def _matches_scripture_filter(self, text: Dict[str, Any], filter_name: str) -> bool:
-        """Check if text matches scripture filter"""
-        if filter_name == "All Texts":
-            return True
+    def _create_simple_response(self, question: str, sources: List[Dict]) -> str:
+        """Create simple response when LLM is not available"""
         
-        collection = text["metadata"].get("collection", "").lower()
+        if not sources:
+            return "No relevant information found for your question."
         
-        filter_mapping = {
-            "Bhagavad Gita": ["bhagavad_gita", "srimadbhagvadgita"],
-            "Ramayana": ["valmiki_ramayana", "ramayana"],
-            "Mahabharata": ["mahabharata"],
-            "Rigveda": ["rigveda"],
-            "Yajurveda": ["yajurveda"],
-            "Atharvaveda": ["atharvaveda", "atharva"],
-            "Ramcharitmanas": ["ramcharitmanas"]
-        }
+        response_parts = [
+            f"Based on the Hindu scriptures, here's what I found regarding '{question}':\n"
+        ]
         
-        for filter_key, collections in filter_mapping.items():
-            if filter_key == filter_name:
-                return any(coll in collection for coll in collections)
+        for i, source in enumerate(sources[:2], 1):
+            content = source.get('content', {})
+            collection = source.get('metadata', {}).get('collection_display', 'Scripture')
+            
+            text = ""
+            if isinstance(content, dict):
+                # Prefer English, then other fields
+                for field in ['english', 'text', 'content', 'meaning', 'hindi']:
+                    if field in content and content[field]:
+                        text = str(content[field])
+                        # Truncate long text
+                        if len(text) > 400:
+                            text = text[:400] + "..."
+                        break
+            
+            if text:
+                response_parts.append(f"\n**From {collection}:**\n{text}")
         
-        return True
+        response_parts.append(f"\n\n*This response is based on {len(sources)} relevant passages from the Hindu scriptures.*")
+        
+        return "".join(response_parts)
+    
+    def rebuild_index(self):
+        """Rebuild search index - simplified for keyword search"""
+        logger.info("🔄 Rebuilding search index...")
+        self.is_initialized = False
+        
+        # Clear Streamlit cache
+        if hasattr(st, 'cache_data'):
+            st.cache_data.clear()
+        if hasattr(st, 'cache_resource'):
+            st.cache_resource.clear()
+        
+        # Reinitialize
+        return self.initialize(force_rebuild=True)
     
     def get_system_stats(self) -> Dict[str, Any]:
         """Get system statistics"""
         if not self.is_initialized:
             return {"status": "Not initialized"}
         
-        stats = {
-            "total_texts": len(self.texts) if self.texts else 0,
-            "embedding_dimension": self.embeddings.shape[1] if self.embeddings is not None else 0,
-            "collections": {}
-        }
-        
-        # Get collection statistics
+        collections = {}
         if self.texts:
             for text in self.texts:
-                collection = text["metadata"].get("collection", "unknown")
-                stats["collections"][collection] = stats["collections"].get(collection, 0) + 1
+                collection = text.get('metadata', {}).get('collection_display', 'Unknown')
+                collections[collection] = collections.get(collection, 0) + 1
         
-        # Get vector store stats
-        vector_stats = self.vector_store.get_stats()
-        stats.update(vector_stats)
-        
-        return stats
-    
-    def rebuild_index(self):
-        """Rebuild embeddings and index from scratch"""
-        logger.info("Rebuilding RAG index...")
-        self.is_initialized = False
-        
-        # Clear cached data
-        st.cache_data.clear()
-        st.cache_resource.clear()
-        
-        # Reinitialize with force rebuild
-        return self.initialize(force_rebuild=True)
+        return {
+            "status": "Initialized",
+            "total_texts": len(self.texts) if self.texts else 0,
+            "search_method": "Keyword-based (Fast)",
+            "collections": collections,
+            "embedding_dimension": "N/A (Not using embeddings)",
+            "index_type": "Keyword Search"
+        }
     
     def get_sample_questions(self) -> List[str]:
-        """Get sample questions based on available data"""
-        base_questions = Config.SAMPLE_QUESTIONS.copy()
+        """Get sample questions based on loaded collections"""
+        base_questions = [
+            "What is dharma according to Hindu scriptures?",
+            "How to live a spiritual life?",
+            "What is the importance of devotion?",
+            "How to overcome difficulties in life?",
+            "What are the qualities of a good person?"
+        ]
         
-        # Add collection-specific questions if data is available
+        # Add collection-specific questions based on your actual data
         if self.texts:
             collections = set()
             for text in self.texts:
-                collections.add(text["metadata"].get("collection", ""))
+                collection = text.get('metadata', {}).get('collection', '')
+                collections.add(collection.lower())
             
-            if "bhagavad_gita" in collections:
-                base_questions.append("What does Bhagavad Gita say about yoga?")
-            if "ramayana" in collections:
-                base_questions.append("Describe Hanuman's qualities from Ramayana")
-            if "rigveda" in collections:
-                base_questions.append("What are the main themes in Rigveda?")
+            if 'ramcharitmanas' in collections:
+                base_questions.extend([
+                    "What does Ramcharitmanas say about devotion?",
+                    "Tell me about Hanuman's qualities",
+                    "What is the importance of guru according to Tulsidas?",
+                    "How does Tulsidas describe true bhakti?"
+                ])
+            
+            if 'valmiki_ramayana' in collections:
+                base_questions.extend([
+                    "What are Ram's ideals in Valmiki Ramayana?",
+                    "How does Ram demonstrate dharma?",
+                    "What can we learn from Sita's character?",
+                    "What are the lessons from Ramayana?"
+                ])
         
         return base_questions[:8]  # Limit to 8 questions
     
@@ -332,19 +423,17 @@ class KalkiRAGChain:
         matching_texts = []
         
         for text in self.texts:
-            content_text = text.get("chunk_text", "").lower()
-            content_fields = text.get("content", {})
+            search_text = text.get("search_text", "")
+            content = text.get("content", {})
             
-            # Check all text fields
-            all_text = " ".join([
-                content_fields.get("sanskrit", ""),
-                content_fields.get("hindi", ""),
-                content_fields.get("english", ""),
-                content_text
-            ]).lower()
+            if not search_text:
+                continue
             
             # Calculate keyword match score
-            matches = sum(1 for keyword in keywords if keyword.lower() in all_text)
+            matches = 0
+            for keyword in keywords:
+                if keyword.lower() in search_text:
+                    matches += 1
             
             if matches > 0:
                 text_copy = text.copy()
@@ -355,3 +444,27 @@ class KalkiRAGChain:
         # Sort by match score
         matching_texts.sort(key=lambda x: x["match_score"], reverse=True)
         return matching_texts[:max_results]
+    
+    def get_collections(self) -> Dict[str, int]:
+        """Get available collections and their counts"""
+        collections = {}
+        
+        if self.texts:
+            for text in self.texts:
+                collection = text.get('metadata', {}).get('collection_display', 'Unknown')
+                collections[collection] = collections.get(collection, 0) + 1
+        
+        return collections
+    
+    def filter_by_collection(self, collection_name: str) -> List[Dict[str, Any]]:
+        """Filter texts by collection"""
+        if not self.texts:
+            return []
+        
+        filtered_texts = []
+        for text in self.texts:
+            text_collection = text.get('metadata', {}).get('collection_display', '')
+            if collection_name.lower() in text_collection.lower() or collection_name == "All Texts":
+                filtered_texts.append(text)
+        
+        return filtered_texts

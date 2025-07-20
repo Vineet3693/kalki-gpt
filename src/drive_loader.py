@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 # 🔧 CONFIGURATION - ONLY CHANGE THIS LINE
-GDRIVE_ZIP_ID = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74mHvnckdWW4"  # ← PUT YOUR DRIVE FILE ID HERE
+GDRIVE_ZIP_ID = "https://drive.google.com/file/d/1AKXBWVM2ooeZ8MJ5ZeRHS1Ph1JObcDP0/view?usp=drive_link"  # ← PUT YOUR DRIVE FILE ID HERE
 
 @st.cache_data
 def load_all_scripture_data():

@@ -1,0 +1,58 @@
+
+{
+  "trilingual_response": {
+    "structure": {
+      "main_answer": {
+        "hindi": "मुख्य उत्तर हिंदी में",
+        "english": "Main answer in English"
+      },
+      "sanskrit_verses": [
+        {
+          "sanskrit": "संस्कृत श्लोक",
+          "transliteration": "Sanskrit transliteration",
+          "translation_hindi": "हिंदी अनुवाद",
+          "translation_english": "English translation",
+          "source": "Source reference"
+        }
+      ],
+      "explanation": {
+        "detailed_hindi": "विस्तृत व्याख्या हिंदी में",
+        "detailed_english": "Detailed explanation in English"
+      },
+      "sources": [
+        {
+          "text_name": "ग्रंथ का नाम",
+          "chapter": "अध्याय",
+          "verse": "श्लोक संख्या",
+          "reference": "संदर्भ"
+        }
+      ]
+    }
+  },
+  "fallback_response": {
+    "message": "I found relevant information from the scriptures, but couldn't generate a complete response. Here are the relevant verses:",
+    "hindi_message": "मुझे शास्त्रों से संबंधित जानकारी मिली, लेकिन पूर्ण उत्तर नहीं दे सका। यहाँ संबंधित श्लोक हैं:",
+    "structure": {
+      "verses": [
+        {
+          "sanskrit": "Sanskrit verse",
+          "hindi": "Hindi translation", 
+          "english": "English translation",
+          "source": "Source information"
+        }
+      ]
+    }
+  },
+  "error_response": {
+    "no_results": {
+      "hindi": "खुशी है! आपके प्रश्न के लिए संबंधित जानकारी नहीं मिली। कृपया अपना प्रश्न दोबारा पूछें।",
+      "english": "I couldn't find relevant information for your question. Please try rephrasing or asking about different topics."
+    },
+    "system_error": {
+      "hindi": "सिस्टम में कोई त्रुटि हुई है। कृपया बाद में प्रयास करें।",
+      "english": "A system error occurred. Please try again later."
+    }
+  }
+}
+
+----

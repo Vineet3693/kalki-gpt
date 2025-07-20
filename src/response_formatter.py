@@ -1,11 +1,47 @@
 
+# src/response_formatter.py - FIXED VERSION
+
 import streamlit as st
 import re
 from typing import Dict, List, Any
-from src.multilingual import MultilingualProcessor
 from src.utils import setup_logging
 
 logger = setup_logging()
+
+class MultilingualProcessor:
+    """Simple multilingual processor for basic text handling"""
+    
+    def transliterate_devanagari(self, text: str) -> str:
+        """Basic transliteration of Devanagari to Roman script"""
+        if not text:
+            return ""
+        
+        # Simple character mapping for common Devanagari characters
+        transliteration_map = {
+            'क': 'ka', 'ख': 'kha', 'ग': 'ga', 'घ': 'gha', 'ङ': 'nga',
+            'च': 'cha', 'छ': 'chha', 'ज': 'ja', 'झ': 'jha', 'ञ': 'nja',
+            'ट': 'ta', 'ठ': 'tha', 'ड': 'da', 'ढ': 'dha', 'ण': 'na',
+            'त': 'ta', 'थ': 'tha', 'द': 'da', 'ध': 'dha', 'न': 'na',
+            'प': 'pa', 'फ': 'pha', 'ब': 'ba', 'भ': 'bha', 'म': 'ma',
+            'य': 'ya', 'र': 'ra', 'ल': 'la', 'व': 'va',
+            'श': 'sha', 'ष': 'sha', 'स': 'sa', 'ह': 'ha',
+            'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ii', 'उ': 'u', 'ऊ': 'uu',
+            'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au',
+            'ा': 'aa', 'ि': 'i', 'ी': 'ii', 'ु': 'u', 'ू': 'uu',
+            'े': 'e', 'ै': 'ai', 'ो': 'o', 'ौ': 'au',
+            '्': '', '।': '.', '॥': '||'
+        }
+        
+        result = ""
+        for char in text:
+            if char in transliteration_map:
+                result += transliteration_map[char]
+            elif char.isspace() or char in '.,;:!?()-[]{}':
+                result += char
+            else:
+                result += char  # Keep unknown characters as is
+        
+        return result.strip()
 
 class ResponseFormatter:
     """Format LLM responses for beautiful display"""
@@ -124,13 +160,23 @@ class ResponseFormatter:
             content = source.get("content", {})
             metadata = source.get("metadata", {})
             
+            # Extract text content from various possible fields
+            text_content = ""
+            if isinstance(content, dict):
+                for field in ['text', 'content', 'verse', 'sanskrit', 'hindi', 'english']:
+                    if field in content and content[field]:
+                        text_content = str(content[field])
+                        break
+            else:
+                text_content = str(content)
+            
             formatted_source = {
-                "title": f"{metadata.get('collection', 'Unknown').title()} - {metadata.get('file', 'Unknown')}",
-                "verse_reference": metadata.get('verse_number', 'N/A'),
+                "title": f"{metadata.get('collection_display', 'Unknown')} - {metadata.get('source_file', 'Unknown')}",
+                "verse_reference": metadata.get('verse_number', metadata.get('item_index', 'N/A')),
                 "chapter": metadata.get('chapter', 'N/A'),
                 "sanskrit": content.get('sanskrit', ''),
                 "hindi": content.get('hindi', ''),
-                "english": content.get('english', ''),
+                "english": content.get('english', text_content),
                 "similarity_score": source.get('similarity_score', 0),
                 "collection": metadata.get('collection', 'unknown')
             }
@@ -153,11 +199,11 @@ class ResponseFormatter:
                 "What is Krishna's advice on meditation?"
             ])
         
-        if any(word in query_lower for word in ['dharma', 'duty']):
+        if any(word in query_lower for word in ['ram', 'rama']):
             related_questions.extend([
-                "What is the difference between dharma and karma?",
-                "How is dharma described in Ramayana?",
-                "What are the types of dharma mentioned in scriptures?"
+                "What are Ram's ideals in Ramayana?",
+                "How does Ram demonstrate dharma?",
+                "What can we learn from Ram's character?"
             ])
         
         if any(word in query_lower for word in ['dharma', 'duty']):
@@ -165,6 +211,13 @@ class ResponseFormatter:
                 "What is the difference between dharma and karma?",
                 "How is dharma described in Ramayana?",
                 "What are the types of dharma mentioned in scriptures?"
+            ])
+        
+        if any(word in query_lower for word in ['bhakti', 'devotion']):
+            related_questions.extend([
+                "What is true bhakti according to scriptures?",
+                "How to develop devotion?",
+                "Different forms of bhakti yoga"
             ])
         
         if any(word in query_lower for word in ['karma', 'action']):
@@ -177,9 +230,19 @@ class ResponseFormatter:
         if any(word in query_lower for word in ['meditation', 'dhyana']):
             related_questions.extend([
                 "What are the stages of meditation?",
-                "How to practice dhyana according to Patanjali?",
-                "Benefits of meditation in scriptures"
+                "How to practice dhyana according to scriptures?",
+                "Benefits of meditation in Hindu texts"
             ])
+        
+        # Default questions if no keywords match
+        if not related_questions:
+            related_questions = [
+                "What is the essence of dharma?",
+                "How to live a spiritual life?",
+                "What is the path to moksha?",
+                "Importance of guru in spiritual journey",
+                "How to overcome difficulties in life?"
+            ]
         
         # Remove duplicates and limit to 5
         return list(set(related_questions))[:5]
@@ -317,7 +380,7 @@ class ResponseFormatter:
             st.markdown("## 📚 स्रोत / Sources")
             
             for source in components["sources"]:
-                similarity_score = f"{source['similarity_score']:.2f}" if source['similarity_score'] > 0 else "N/A"
+                similarity_score = f"{source['similarity_score']:.1%}" if source['similarity_score'] > 0 else "N/A"
                 
                 st.markdown(f'''
                 <div class="source-card">
@@ -341,8 +404,36 @@ class ResponseFormatter:
             
             for question in components["related_questions"]:
                 if st.button(question, key=f"related_q_{hash(question)}"):
-                    st.experimental_rerun()
+                    st.session_state.query = question
+                    st.rerun()
             
             st.markdown('</div>', unsafe_allow_html=True)
-
-----
+    
+    def display_response(self, response: Dict[str, Any]):
+        """Simple response display method for compatibility"""
+        if "response" in response:
+            st.markdown("### 📖 Answer from Scriptures")
+            st.markdown(response["response"])
+        
+        # Display sources if available
+        if "sources" in response and response["sources"]:
+            with st.expander("📚 Sources", expanded=True):
+                for i, source in enumerate(response["sources"], 1):
+                    metadata = source.get('metadata', {})
+                    content = source.get('content', {})
+                    
+                    st.markdown(f"""
+                    **Source {i}:** {metadata.get('collection_display', 'Unknown')}  
+                    **File:** {metadata.get('source_file', 'Unknown')}  
+                    **Relevance:** {source.get('similarity_score', 0):.1%}  
+                    """)
+                    
+                    # Show content preview
+                    if isinstance(content, dict):
+                        for field in ['text', 'content', 'verse', 'english', 'hindi', 'sanskrit']:
+                            if field in content and content[field]:
+                                preview = str(content[field])[:200]
+                                st.markdown(f"**{field.title()}:** {preview}...")
+                                break
+                    
+                    st.markdown("---")
